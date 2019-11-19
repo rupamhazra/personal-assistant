@@ -11,14 +11,30 @@ import wikipedia
 import pyttsx3 #voice output
 import webbrowser
 from pywinauto import application 
-
-
-
+from pprint import pprint
+import requests
+import pytemperature
+import time
+from pygame import mixer
 
 # Text to voice conversion
 
 try:
+    mixer.init()
+    # Chrome browser
+    chrome_path='C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+    webbrowser.register('chrome',None,webbrowser.BackgroundBrowser(chrome_path))
+
+    # Check wheather
+    API_KEY = '770436733470f942485967ca3c221b71'
+    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Kolkata&appid='+API_KEY)
+    r = r.json()
+    print('r',r['main'])
+    temp = float(r['main']['temp'])
+    temp = pytemperature.k2c(temp)
+    #print('temp',str(temp))
     engine = pyttsx3.init()
+
 except ImportError:
     print('Request driver is not found')
 except RuntimeError:
@@ -38,7 +54,28 @@ def speak(audio):
 
 def wishMe():
     print('wisme')
+
     hour = int(datetime.datetime.now().hour)
+    #os.startfile('robot-e.mp3')
+    mixer.music.load('robot-e.mp3')
+    mixer.music.play()
+    #winsound.PlaySound('robot-e.mp3',winsound.SND_ALIAS)
+    time.sleep(2.3)
+    speak('Starting all system and applications')
+    #os.startfile('robot-m.mp3')
+    mixer.music.load('robot-m.mp3')
+    mixer.music.play()
+    time.sleep(20)
+    speak('Checking health of all core processors')
+    engine.runAndWait()
+    speak('All system has been started')
+    mixer.music.load('robot-e.mp3')
+    mixer.music.play()
+    time.sleep(2.3)
+    speak('Now, i am online')
+    speak('Hi i am ram , personal digital assistant') 
+    engine.runAndWait()
+
     if hour>=0 and hour<12:
         speak("Good Morning")
 
@@ -47,13 +84,28 @@ def wishMe():
     else:
         speak('Good Evening')
     
-    speak('I am ram Sir. Please tell me how may i help you')
+    print(getDate())
+    speak(getDate())
+    now = time.strftime("%I:%M %p")
+    print('Time is ', now)
+    speak('Time is '+ time.strftime("%I")+time.strftime("%M")+time.strftime("%p"))
+    engine.runAndWait()
+    print('current temparature in your city '+str(temp)+' degree celcias')
+    speak('current temparature in your city '+str(temp)+' degree celcias')
+    print('humidity is ' +str(r['main']['humidity']))
+    speak('humidity is '+str(r['main']['humidity']))
+    print('pressure is ' +str(r['main']['pressure']))
+    speak('pressure is '+str(r['main']['pressure']))
+    engine.runAndWait()
+    #speak('I am ram Sir. Please tell me how may i help you')
+    
+    
 
 
 # Record audio and return it as a string
 def takeCommand():
     r = sr.Recognizer()
-    print('list',sr.Microphone().list_microphone_names())
+    #print('list',sr.Microphone().list_microphone_names())
     with sr.Microphone() as source:
         print('Say something')
         r.pause_threshold = 1
@@ -80,7 +132,7 @@ def takeCommand():
 
 # A function to check if the users command/text contains a wake word/pharse
 def wakeWord(text):
-	WAKE_WORDS = ['hi ram','okay ram']
+	WAKE_WORDS = ['hore ram','okay ram']
 	text =  text.lower()
 	for pharse in WAKE_WORDS:
 		if pharse in text:
@@ -132,8 +184,10 @@ def getPerson(text):
 
 if __name__ == "__main__":
     wishMe()
+    
     waketext = takeCommand().lower()
     if(wakeWord(waketext) == True):
+
         while True:
 
             #Check for the wake word/pharse
@@ -180,36 +234,58 @@ if __name__ == "__main__":
                 app =  application.Application()
                 app.start("Notepad.exe")
 
-            elif 'chrome' in text.lower():
-                print('text1111111',text)
-                app =  application.Application()
-                app.start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
+            # elif 'open chrome' in text.lower():
+            #     print('text1111111',text)
+            #     app =  application.Application()
+            #     app.start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
                     
-            elif 'search' in text.lower():
-                search_terms = text.replace('search ','')
-                print('search_terms',search_terms)
-                url = "https://www.google.com.tr/search?q={}".format(search_terms)
-                webbrowser.open_new_tab(url)
-
-            elif 'open youtube' in text.lower():
-                txt = "do you want listen or search anything?"
+            elif 'open chrome' in text.lower():
+                
+                txt = "Do you want to search anything?"
                 print(txt)
                 speak(txt)
+                text = takeCommand().lower()
                 engine.runAndWait()
+
+                if text.lower() == "yes":
+                    txt = "Please tell me what do you want to search?"
+                    print(txt)
+                    speak(txt)
+                    text = takeCommand().lower()
+                    search_terms = text.replace('search ','')
+                    speak("ok sir, please wait i am searching your text in chrome..")
+                    engine.runAndWait()
+                    url = "https://www.google.com/search?q={}".format(search_terms)
+                    webbrowser.get('chrome').open(url)
+
+                elif text.lower() == "no":
+                    speak("ok sir, please wait i am opening chrome..")
+                    engine.runAndWait()
+                    url = "https://www.google.com/"
+                    webbrowser.get('chrome').open(url)
+
+            elif 'open youtube' in text.lower():
+                txt = "Do you want to listen or search anything?"
+                print(txt)
+                speak(txt)
+                text = takeCommand().lower()
+                engine.runAndWait()
+                print('check',text)
                 if text.lower() == "yes":
                     txt = "Please tell me what do you want to listen or play?"
                     print(txt)
                     speak(txt)
                     text = takeCommand().lower()
-                    speak("ok, sir")
-                    #search_terms = text.replace('open youtube and search ','')
+                    speak("ok sir, i am opening youtube")
+                    engine.runAndWait()
                     url = "https://www.youtube.com/results?search_query={}".format(text)
                     webbrowser.open_new_tab(url)
 
                 elif text.lower() == "no":
-                    txt = 'ok, sir'
+                    txt = 'ok sir, i am opening youtube'
                     print(txt)
                     speak(txt)
+                    engine.runAndWait()
                     url = "https://www.youtube.com/"
                     webbrowser.open_new_tab(url)
 
