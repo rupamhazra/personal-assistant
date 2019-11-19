@@ -1,0 +1,12 @@
+env/
+*.env
+__pycache__/
+# db.sqlite3
+
+*.pyc
+migrations/
+media/
+*.vscode
+.history/
+debug.log
+.idea/workspace.xml

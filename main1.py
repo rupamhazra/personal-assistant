@@ -9,7 +9,6 @@ import datetime
 import calendar
 import wikipedia
 import pyttsx3 #voice output
-import pyautogui
 import webbrowser
 from pywinauto import application 
 
@@ -24,12 +23,12 @@ except ImportError:
     print('Request driver is not found')
 except RuntimeError:
     print('Driver fails to initilize')
-# voices = engine.getProperty('voices')
+#voices = engine.getProperty('voices')
 # for voice in voices:
 #     print('voice',voice.id)      
 engine.setProperty('voice','HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
 rate = engine.getProperty('rate')
-print('rate',rate)
+#print('rate',rate)
 engine.setProperty('rate',150)
 #ttx.runAndWait()
 
@@ -38,6 +37,7 @@ def speak(audio):
     engine.runAndWait()
 
 def wishMe():
+    print('wisme')
     hour = int(datetime.datetime.now().hour)
     if hour>=0 and hour<12:
         speak("Good Morning")
@@ -53,7 +53,7 @@ def wishMe():
 # Record audio and return it as a string
 def takeCommand():
     r = sr.Recognizer()
-    #print('list',sr.Microphone().list_microphone_names())
+    print('list',sr.Microphone().list_microphone_names())
     with sr.Microphone() as source:
         print('Say something')
         r.pause_threshold = 1
@@ -75,11 +75,6 @@ def takeCommand():
 
     return ""
 
-if __name__ == "__main__":
-    wishMe()
-    while True:
-        query = takeCommand().lower()
-        if(wakeWord(query) == True):
 
 
 
@@ -188,12 +183,34 @@ if __name__ == "__main__":
             elif 'chrome' in text.lower():
                 print('text1111111',text)
                 app =  application.Application()
-                app.start("chrome.exe") 
+                app.start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
                     
             elif 'search' in text.lower():
-                search_terms = []
-                for term in search_terms:
-                    url = "https://www.google.com.tr/search?q={}".format(term)
+                search_terms = text.replace('search ','')
+                print('search_terms',search_terms)
+                url = "https://www.google.com.tr/search?q={}".format(search_terms)
+                webbrowser.open_new_tab(url)
+
+            elif 'open youtube' in text.lower():
+                txt = "do you want listen or search anything?"
+                print(txt)
+                speak(txt)
+                engine.runAndWait()
+                if text.lower() == "yes":
+                    txt = "Please tell me what do you want to listen or play?"
+                    print(txt)
+                    speak(txt)
+                    engine.runAndWait()
+                    speak("ok, sir")
+                    #search_terms = text.replace('open youtube and search ','')
+                    url = "https://www.youtube.com/results?search_query={}".format(text.lower())
+                    webbrowser.open_new_tab(url)
+
+                elif text.lower() == "no":
+                    txt = 'ok, sir'
+                    print(txt)
+                    speak(txt)
+                    url = "https://www.youtube.com/"
                     webbrowser.open_new_tab(url)
 
             elif 'open' in text.lower():
@@ -202,7 +219,6 @@ if __name__ == "__main__":
             elif 'sublime' in text.lower():
                 app =  application.Application()
                 app.start("C:\Program Files\Sublime Text 3\sublime_text.exe") 
-        
-            elif 'youtube' in text:
-                url = "https://www.youtube.com"
-                webbrowser.open_new_tab(url)
+    else:
+        speak('Sorry, I am not able to recognise you!!')
+            
