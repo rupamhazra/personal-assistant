@@ -200,10 +200,10 @@ if __name__ == "__main__":
                     txt = "Please tell me what do you want to listen or play?"
                     print(txt)
                     speak(txt)
-                    engine.runAndWait()
+                    text = takeCommand().lower()
                     speak("ok, sir")
                     #search_terms = text.replace('open youtube and search ','')
-                    url = "https://www.youtube.com/results?search_query={}".format(text.lower())
+                    url = "https://www.youtube.com/results?search_query={}".format(text)
                     webbrowser.open_new_tab(url)
 
                 elif text.lower() == "no":
