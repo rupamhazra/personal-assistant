@@ -15,12 +15,12 @@ import requests
 import pytemperature
 import time
 from pygame import mixer
-
+import win32api
+import win32con
 
 def speak(audio):
     engine.say(audio)
     engine.runAndWait()
-
 
 def setBrowser(browser_name):
     if browser_name == 'chrome':
@@ -204,13 +204,13 @@ if __name__ == "__main__":
     waketext = takeCommand().lower()
     print('waketext',waketext)
     if(wakeWord(waketext) == True):
+
+        responseMusicEverytime()
+        print('I am ready to listen you..')
+        speak('I am ready to listen you..')
+
         while True:
-            #Check for the wake word/pharse
-
-            responseMusicEverytime()
-            print('I am ready to listen you..')
-            speak('I am ready to listen you..')
-
+            
             text = takeCommand().lower()
             #print('text',text)
 
@@ -318,9 +318,21 @@ if __name__ == "__main__":
                 app.start("C:\Program Files\Sublime Text 3\sublime_text.exe")  
             
             elif 'open' in text.lower():
-                speak("ok sir, please wait..")
-                time.sleep(2)
-                os.system('explorer C:\\"{}"'.format(text.replace('Open ','')))
+                os.system("cmd /c control")
+                responseMusicEverytime()
+                print('Which my computer you want to open?')
+                speak("Which my computer you want to open?")
+                text = takeCommand()
+                if "control panel" in text.lower():
+                    responseMusicEverytime()
+                    time.sleep(2)
+                    #print('text check',text.lower())
+                    os.system("cmd /c control")
+                    
+                elif "my computer" in text.lower():
+                    responseMusicEverytime()
+                    time.sleep(2)
+                    os.system('explorer')
     # else:
     #     takeCommand().lower()
     #     speak('Sorry, I am not able to recognise you!!')
