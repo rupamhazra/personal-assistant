@@ -10,30 +10,50 @@ import calendar
 import wikipedia
 import pyttsx3 #voice output
 import webbrowser
-from pywinauto import application 
-from pprint import pprint
+from pywinauto import application
 import requests
 import pytemperature
 import time
 from pygame import mixer
 
-# Text to voice conversion
 
-try:
-    mixer.init()
-    # Chrome browser
-    chrome_path='C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
-    webbrowser.register('chrome',None,webbrowser.BackgroundBrowser(chrome_path))
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
 
-    # Check wheather
+
+def setBrowser(browser_name):
+    if browser_name == 'chrome':
+        chrome_path='C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+        webbrowser.register('chrome',None,webbrowser.BackgroundBrowser(chrome_path))
+
+def getWheatherDetails(city_name):
     API_KEY = '770436733470f942485967ca3c221b71'
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Kolkata&appid='+API_KEY)
+    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q='+city_name+'&appid='+API_KEY)
     r = r.json()
-    print('r',r['main'])
+    #print('r',r['main'])
     temp = float(r['main']['temp'])
     temp = pytemperature.k2c(temp)
-    #print('temp',str(temp))
+    details ={
+        "temp":temp,
+        "humidity":str(r['main']['humidity']),
+        "pressure":str(r['main']['pressure'])
+    }
+    return details
+
+try:
+
+    # Initiate text to voice
     engine = pyttsx3.init()
+
+    # For playing music from pygame
+    mixer.init()
+
+    # Chrome browser
+    setBrowser('chrome')
+
+    # Check wheather
+    wheather_details = getWheatherDetails('kolkata')
 
 except ImportError:
     print('Request driver is not found')
@@ -44,63 +64,63 @@ except RuntimeError:
 #     print('voice',voice.id)      
 engine.setProperty('voice','HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
 rate = engine.getProperty('rate')
-#print('rate',rate)
-engine.setProperty('rate',150)
-#ttx.runAndWait()
+engine.setProperty('rate',140)
 
-def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+def responseMusicEverytime():
+    mixer.music.load('robot-e.mp3')
+    mixer.music.play()
+    time.sleep(2)
 
 def wishMe():
     print('wisme')
 
-    hour = int(datetime.datetime.now().hour)
-    #os.startfile('robot-e.mp3')
-    mixer.music.load('robot-e.mp3')
-    mixer.music.play()
-    #winsound.PlaySound('robot-e.mp3',winsound.SND_ALIAS)
-    time.sleep(2.3)
-    speak('Starting all system and applications')
-    #os.startfile('robot-m.mp3')
-    mixer.music.load('robot-m.mp3')
-    mixer.music.play()
-    time.sleep(20)
-    speak('Checking health of all core processors')
-    engine.runAndWait()
-    speak('All system has been started')
-    mixer.music.load('robot-e.mp3')
-    mixer.music.play()
-    time.sleep(2.3)
-    speak('Now, i am online')
-    speak('Hi i am ram , personal digital assistant') 
-    engine.runAndWait()
-
-    if hour>=0 and hour<12:
-        speak("Good Morning")
-
-    elif hour>=12 and hour<=18:
-        speak('Good Afternoon')
-    else:
-        speak('Good Evening')
+    # hour = int(datetime.datetime.now().hour)
     
-    print(getDate())
-    speak(getDate())
-    now = time.strftime("%I:%M %p")
-    print('Time is ', now)
-    speak('Time is '+ time.strftime("%I")+time.strftime("%M")+time.strftime("%p"))
-    engine.runAndWait()
-    print('current temparature in your city '+str(temp)+' degree celcias')
-    speak('current temparature in your city '+str(temp)+' degree celcias')
-    print('humidity is ' +str(r['main']['humidity']))
-    speak('humidity is '+str(r['main']['humidity']))
-    print('pressure is ' +str(r['main']['pressure']))
-    speak('pressure is '+str(r['main']['pressure']))
-    engine.runAndWait()
-    #speak('I am ram Sir. Please tell me how may i help you')
-    
-    
+    # mixer.music.load('robot-e.mp3')
+    # mixer.music.play()
 
+    # time.sleep(2.3)
+    # speak('Starting all system and applications')
+    
+    # mixer.music.load('robot-m.mp3')
+    # mixer.music.play()
+    # time.sleep(17)
+    # speak('Checking health of all core processors')
+    # engine.runAndWait()
+    # speak('All system has been started')
+    # mixer.music.load('robot-e.mp3')
+    # mixer.music.play()
+    # time.sleep(2.3)
+
+    # speak('Now, i am online')
+    # speak('Hi i am ram , personal digital assistant') 
+    # engine.runAndWait()
+
+    # if hour>=0 and hour<12:
+    #     speak("Good Morning")
+    # elif hour>=12 and hour<=18:
+    #     speak('Good Afternoon')
+    # else:
+    #     speak('Good Evening')
+    
+    # print(getDate())
+    # speak(getDate())
+
+    # now = time.strftime("%I:%M %p")
+    # print('Time is ', now)
+    # speak('Time is '+ time.strftime("%I")+time.strftime("%M")+time.strftime("%p"))
+    # engine.runAndWait()
+
+    # print('current temparature in your city '+str(wheather_details['temp'])+' degree celcias')
+    # speak('current temparature in your city '+str(wheather_details['temp'])+' degree celcias')
+    # print('humidity is ' +wheather_details['humidity'])
+    # speak('humidity is '+wheather_details['humidity'])
+    # print('pressure is ' +wheather_details['pressure'])
+    # speak('pressure is '+wheather_details['pressure'])
+    # engine.runAndWait()
+
+    # speak('I am ram Sir. Please tell me how may i help you')
+   
 
 # Record audio and return it as a string
 def takeCommand():
@@ -119,20 +139,16 @@ def takeCommand():
         return data
     except sr.RequestError as e:
         # API was unreachable or unresponsive
-        print("Request results from Google Speech Recognition service"+e)
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
     except sr.UnknownValueError:
         # speech was unintelligible
-        print("Sorry about that, i didn't hear anything")
+        print("Google Speech Recognition could not understand audio")
         #ttx.say(txt)
-
-    return ""
-
-
-
+    return ''
 
 # A function to check if the users command/text contains a wake word/pharse
 def wakeWord(text):
-	WAKE_WORDS = ['hore ram','okay ram']
+	WAKE_WORDS = ['hi ram','okay ram']
 	text =  text.lower()
 	for pharse in WAKE_WORDS:
 		if pharse in text:
@@ -186,20 +202,23 @@ if __name__ == "__main__":
     wishMe()
     
     waketext = takeCommand().lower()
+    print('waketext',waketext)
     if(wakeWord(waketext) == True):
-
         while True:
-
             #Check for the wake word/pharse
 
-            print('ddddddddddddddd')
+            responseMusicEverytime()
+            print('I am ready to listen you..')
+            speak('I am ready to listen you..')
+
             text = takeCommand().lower()
-            print('text',text)
+            #print('text',text)
 
             # check the see if the user said anything about date
             if ('date' in text):
                 get_date  = getDate()
-                response = response + ' ' + get_date
+                time.sleep(1)
+                speak(get_date)
             
             #Have the assistant respond back using audio and the text
             elif ('time' in text):
@@ -210,7 +229,9 @@ if __name__ == "__main__":
                     hour = now.hour -12
                 else:
                     meridiem = 'a.m'
-                response = response + 'It is '+ str(hour) +':'+str(now.minute)+' '+meridiem+' .'
+                time = 'It is '+ str(hour) +':'+str(now.minute)+' '+meridiem+' .'
+                print('current time is',time)
+                speak(time)
             
             # Check to see if the user said 'who is'
             elif('who is' in text):
@@ -223,24 +244,27 @@ if __name__ == "__main__":
                 print('response',response)
 
             elif 'take a screenshot' in text.lower():
+                speak("ok sir, please wait..")
+                time.sleep(2)
                 img = pyautogui.screenshot()
                 img.save(r"C:\Users\rupam\Pictures\screenshot_"+str(random.randint(0,9))+'.png')
                 print('Screenshot done')
             
+            elif 'shutdown' in text.lower():
+                speak("ok sir, please wait i am shutdown your computer..")
+                time.sleep(2)   
+                os.system("shutdown /s /t 1");
+            
             elif 'restart' in text.lower():
+                speak("ok sir, please wait i am restarting your computer..")
+                time.sleep(2) 
                 os.system("shutdown /r /t 1")
 
             elif 'notepad' in text.lower():
                 app =  application.Application()
                 app.start("Notepad.exe")
-
-            # elif 'open chrome' in text.lower():
-            #     print('text1111111',text)
-            #     app =  application.Application()
-            #     app.start("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe")
                     
             elif 'open chrome' in text.lower():
-                
                 txt = "Do you want to search anything?"
                 print(txt)
                 speak(txt)
@@ -289,12 +313,15 @@ if __name__ == "__main__":
                     url = "https://www.youtube.com/"
                     webbrowser.open_new_tab(url)
 
-            elif 'open' in text.lower():
-                os.system('explorer C:\\"{}"'.format(text.replace('Open ','')))
-
             elif 'sublime' in text.lower():
                 app =  application.Application()
-                app.start("C:\Program Files\Sublime Text 3\sublime_text.exe") 
-    else:
-        speak('Sorry, I am not able to recognise you!!')
+                app.start("C:\Program Files\Sublime Text 3\sublime_text.exe")  
+            
+            elif 'open' in text.lower():
+                speak("ok sir, please wait..")
+                time.sleep(2)
+                os.system('explorer C:\\"{}"'.format(text.replace('Open ','')))
+    # else:
+    #     takeCommand().lower()
+    #     speak('Sorry, I am not able to recognise you!!')
             
